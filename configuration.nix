@@ -13,7 +13,7 @@
       # Common configuration for my machines
       # (hardware-configuration.nix is auto-gen)
       ./hardware-configuration.nix
-      ./networking.nix
+#      ./networking.nix
       ./pkgs.nix
       ./services.nix
       ./boot.nix
@@ -28,21 +28,21 @@
   # Set your time zone.
   time.timeZone = "Europe/Berlin";
 
-  # Select internationalisation properties.
-  i18n.defaultLocale = "en_US.UTF-8";
-  console = {
-    font = "Lat2-Terminus16";
-    keyMap = "de-latin1";
+  # pinyin input
+  i18n.inputMethod = {
+   enabled = "fcitx";
+   fcitx.engines = with pkgs.fcitx-engines; [ cloudpinyin libpinyin];
   };
-
+ 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.bytee = {
+  users.users.szhou= {
      isNormalUser = true;
      description = "Bytee";
      shell = pkgs.zsh;
-     extraGroups = [ "wheel" "video" "networkmanager" "kvm" "libvirtd" "audio" "docker" "adbusers" "qemu-libvirtd" ];
+     extraGroups = [ "wheel" "video" "networkmanager" "kvm" "libvirtd" "audio" "docker" "adbusers" "qemu-libvirtd" "audio" "disk" "networkmanager"];
   };
 
+  security.sudo.wheelNeedsPassword = false;
   users.extraUsers.root.shell = pkgs.zsh;
 
   # Environment variables
@@ -54,6 +54,6 @@
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "20.09"; # Did you read the comment?
+  system.stateVersion = "21.05"; # Did you read the comment?
 }
 

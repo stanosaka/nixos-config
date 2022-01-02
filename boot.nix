@@ -2,53 +2,160 @@
 { config, pkgs, ... }:
 
 {
-  # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
-  boot.initrd.supportedFilesystems = ["zfs"];
-  boot.supportedFilesystems = ["zfs"];
-  boot.zfs.requestEncryptionCredentials = true;
-
-  boot.kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
-
-  # ZFS stable is broken in latest kernel for now and the 5_11 kernel has been removed from nix
-  # boot.zfs.enableUnstable = true;
-  # boot.kernelPackages = pkgs.linuxPackages_5_11;
-
-  # Not needed for desktop
-  boot.kernelParams = [ "mitigations=off" "amd_iommu=on" ];
-
-  hardware.cpu.amd.updateMicrocode = true;
-
-  # 3D Accel
-  hardware.opengl.enable = true;
-  hardware.opengl.extraPackages = with pkgs; [
-      amdvlk
-      rocm-opencl-icd
-      rocm-opencl-runtime
-      vaapiVdpau
-      libvdpau-va-gl
-  ];
-  hardware.opengl.driSupport = true;
-  hardware.opengl.driSupport32Bit = true;
-
-  # Samba Shares
-  fileSystems."/mnt/fast" = {
-  device = "//10.0.1.20/fast";
-        fsType = "cifs";
-        options = let
-          automount_opts = "x-systemd.automount,uid=1000,gid=100,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
-
-        in ["${automount_opts},credentials=/etc/nixos/smb-secrets"];
+ # Use the systemd-boot EFI boot loader.
+  boot.loader = {
+    #systemd-boot.enable = true;
+    efi = {
+      canTouchEfiVariables = true;
+      efiSysMountPoint = "/boot";
+    };
+    grub = {
+      devices = [ "nodev" ];
+      efiSupport = true;
+      enable = true;
+      extraEntries = ''
+        menuentry "Hackintosh BOOTx64" {
+          insmod part_gpt
+          insmod fat
+          insmod search_fs_uuid
+          insmod chain
+          search --fs-uuid --set=root 0AAD-D8F2
+          chainloader /EFI/BOOT/BOOTx64.efi
+        }
+      '';
+      version = 2;
+      #useOSProber = true;
+    };
   };
 
-  fileSystems."/mnt/slowbackup" = {
-  device = "//10.0.1.20/slowbackup";
-        fsType = "cifs";
-        options = let
-            automount_opts = "x-systemd.automount,uid=1000,gid=100,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+  # Samba client cifs mount
+  # NAS1 
+  fileSystems."/mnt/nas1/Animation" = {
+      device = "//nas1.local.cwzhou.win/Animation";
+      fsType = "cifs";
+      options = let
+        # this line prevents hanging on network split
+        automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
 
-        in ["${automount_opts},credentials=/etc/nixos/smb-secrets"];
+      in ["${automount_opts},uid=1000,credentials=/etc/nixos/smb-secrets"];
+  };
+  fileSystems."/mnt/nas1/classicMovie" = {
+      device = "//nas1.local.cwzhou.win/classicMovie";
+      fsType = "cifs";
+      options = let
+        # this line prevents hanging on network split
+        automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+
+      in ["${automount_opts},uid=1000,credentials=/etc/nixos/smb-secrets"];
+  };
+  fileSystems."/mnt/nas1/Documentaries" = {
+      device = "//nas1.local.cwzhou.win/Documentaries";
+      fsType = "cifs";
+      options = let
+        # this line prevents hanging on network split
+        automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+
+      in ["${automount_opts},uid=1000,credentials=/etc/nixos/smb-secrets"];
+  };
+  fileSystems."/mnt/nas1/movie01" = {
+      device = "//nas1.local.cwzhou.win/movie01";
+      fsType = "cifs";
+      options = let
+        # this line prevents hanging on network split
+        automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+
+      in ["${automount_opts},uid=1000,credentials=/etc/nixos/smb-secrets"];
+  };
+  fileSystems."/mnt/nas1/music" = {
+      device = "//nas1.local.cwzhou.win/music";
+      fsType = "cifs";
+      options = let
+        # this line prevents hanging on network split
+        automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+
+      in ["${automount_opts},uid=1000,credentials=/etc/nixos/smb-secrets"];
+  };
+  fileSystems."/mnt/nas1/photo" = {
+      device = "//nas1.local.cwzhou.win/photo";
+      fsType = "cifs";
+      options = let
+        # this line prevents hanging on network split
+        automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+
+      in ["${automount_opts},uid=1000,credentials=/etc/nixos/smb-secrets"];
+  };
+  fileSystems."/mnt/nas1/recent" = {
+      device = "//nas1.local.cwzhou.win/recent";
+      fsType = "cifs";
+      options = let
+        # this line prevents hanging on network split
+        automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+
+      in ["${automount_opts},uid=1000,credentials=/etc/nixos/smb-secrets"];
+  };
+  fileSystems."/mnt/nas1/tvseries" = {
+      device = "//nas1.local.cwzhou.win/tvseries";
+      fsType = "cifs";
+      options = let
+        # this line prevents hanging on network split
+        automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+
+      in ["${automount_opts},uid=1000,credentials=/etc/nixos/smb-secrets"];
+  };
+  fileSystems."/mnt/nas1/video" = {
+      device = "//nas1.local.cwzhou.win/video";
+      fsType = "cifs";
+      options = let
+        # this line prevents hanging on network split
+        automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+
+      in ["${automount_opts},uid=1000,credentials=/etc/nixos/smb-secrets"];
+  };
+  fileSystems."/mnt/nas1/usbshare1-1" = {
+      device = "//nas1.local.cwzhou.win/usbshare1-1";
+      fsType = "cifs";
+      options = let
+        # this line prevents hanging on network split
+        automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+
+      in ["${automount_opts},uid=1000,credentials=/etc/nixos/smb-secrets"];
+  };
+  fileSystems."/mnt/nas1/usbshare1-2" = {
+      device = "//nas1.local.cwzhou.win/usbshare1-2";
+      fsType = "cifs";
+      options = let
+        # this line prevents hanging on network split
+        automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+
+      in ["${automount_opts},uid=1000,credentials=/etc/nixos/smb-secrets"];
+  };
+
+  # NAS2
+  fileSystems."/mnt/nas2/data" = {
+      device = "//nas2.local.cwzhou.win/data";
+      fsType = "cifs";
+      options = let
+        # this line prevents hanging on network split
+        automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+
+      in ["${automount_opts},uid=1000,credentials=/etc/nixos/smb-secrets"];
+  };
+  fileSystems."/mnt/nas2/devops" = {
+      device = "//nas2.local.cwzhou.win/devops";
+      fsType = "cifs";
+      options = let
+        # this line prevents hanging on network split
+        automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+
+      in ["${automount_opts},uid=1000,credentials=/etc/nixos/smb-secrets"];
+  };
+  fileSystems."/mnt/nas2/Pictures" = {
+      device = "//nas2.local.cwzhou.win/Pictures";
+      fsType = "cifs";
+      options = let
+        # this line prevents hanging on network split
+        automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+
+      in ["${automount_opts},uid=1000,credentials=/etc/nixos/smb-secrets"];
   };
 }
